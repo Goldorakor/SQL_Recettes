@@ -1,0 +1,112 @@
+question 1 :
+
+SELECT nomRecette, categorie, tempsPrepa
+FROM recette
+INNER JOIN genre ON recette.idGenre = genre.idGenre
+ORDER BY tempsPrepa DESC
+
+
+question 2 :
+
+SELECT nomRecette, categorie, tempsPrepa, COUNT(composition.idRecette)
+FROM recette
+INNER JOIN genre ON recette.idGenre = genre.idGenre
+INNER JOIN composition ON recette.idRecette = composition.idRecette
+GROUP BY composition.idRecette
+ORDER BY tempsPrepa DESC
+
+
+question 3 :
+
+SELECT nomRecette
+FROM recette
+WHERE tempsPrepa >= 30
+ORDER BY tempsPrepa DESC 
+
+
+question 4 :
+
+les recettes dont le nom contient le mot « patate »
+SELECT nomRecette
+FROM recette
+WHERE nomRecette LIKE '%patate%'
+
+
+question 5 :
+
+INSERT INTO ingredient (nomIngredient, prixKilo_unite)
+ VALUES ('lardons', 10)
+
+puis 
+
+INSERT INTO recette (nomRecette, tempsPrepa, instructions, idGenre)
+ VALUES ('pâtes à la carbonara', 20, '', 2)
+
+puis ensuite
+INSERT INTO composition (quantiteIngredient, uniteMesure, idRecette, idIngredient)
+ VALUES 
+(500, 'gramme(s)', 31, 40),
+(100, 'gramme(s)', 31, 51),
+(3, 'unité(s)', 31, 2),
+(5, 'cl', 31, 30),
+(2, 'gramme(s)', 31, 36),
+(1, 'gramme(s)', 31, 37),
+(80, 'gramme(s)', 31, 50);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+===============================================================================================================================================
+
+
+
+
+
+SELECT nomRecette, COUNT(recette.idRecette) AS totalIngredients, recette.idGenre AS categorie
+FROM recette
+INNER JOIN composition ON recette.idRecette = composition.idRecette
+INNER JOIN genre ON recette.idGenre = genre.idGenre
+GROUP BY recette.idRecette
+ORDER BY totalIngredients DESC
+
+
+
+
+
+
+
+SELECT nomRecette, idGenre, tempsPrepa 
+FROM recettes_michael
+ORDER BY tempsPrepa DESC
+
+correction 
+SELECT nomRecette, COUNT(r.idRecette) AS totalIngredients
+FROM recette r
+INNER JOIN composition c ON r.idRecette = c.idRecette
+GROUP BY r.idRecette
+ORDER BY totalIngredients desc
+
+correction avec écriture complète
+SELECT nomRecette, COUNT(recette.idRecette) AS totalIngredients
+FROM recette
+INNER JOIN composition ON recette.idRecette = composition.idRecette
+GROUP BY recette.idRecette
+ORDER BY totalIngredients DESC
+
+
+
+
+
