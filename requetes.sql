@@ -52,3 +52,18 @@ INSERT INTO composition (quantiteIngredient, uniteMesure, idRecette, idIngredien
 (2, 'gramme(s)', 31, 36),
 (1, 'gramme(s)', 31, 37),
 (80, 'gramme(s)', 31, 50);
+
+
+question 6 :
+
+UPDATE recette
+SET nomRecette = 'patate au thym de France'
+WHERE idRecette = 3
+
+
+question 7 :
+
+
+
+
+
