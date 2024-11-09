@@ -230,20 +230,90 @@ INSERT INTO composition (quantiteIngredient, uniteMesure, idRecette, idIngredien
 question 20 : 
 
 prix des recettes :
-SELECT recette.nomRecette, SUM(composition.quantiteIngredient*ingredient.prix_gramme_cl_unite)
-FROM composition 
-INNER JOIN ingredient ON composition.idIngredient=ingredient.idIngredient
-INNER JOIN recette ON composition.idRecette=recette.idRecette
-GROUP BY composition.idRecette
 
-
-prix de la (ou des) recette(s) le plus élevée(s) :
-SELECT recette.nomRecette, MAX (SUM(composition.quantiteIngredient*ingredient.prix_gramme_cl_unite))
+SELECT recette.nomRecette, SUM(composition.quantiteIngredient*ingredient.prix_gramme_cl_unite) AS prixRecette (pour que le nom soit plus explicite)
 FROM composition 
 INNER JOIN ingredient ON composition.idIngredient=ingredient.idIngredient
 INNER JOIN recette ON composition.idRecette=recette.idRecette
 GROUP BY composition.idRecette
 ORDER BY SUM(composition.quantiteIngredient*ingredient.prix_gramme_cl_unite) DESC
+
+
+prix de la (ou des) recette(s) le plus élevée(s) :
+
+SELECT MAX(prixRecette) AS prixRecetteMax
+FROM (
+    SELECT recette.nomRecette, SUM(composition.quantiteIngredient*ingredient.prix_gramme_cl_unite) AS prixRecette
+FROM composition 
+INNER JOIN ingredient ON composition.idIngredient=ingredient.idIngredient
+INNER JOIN recette ON composition.idRecette=recette.idRecette
+GROUP BY composition.idRecette
+ORDER BY SUM(composition.quantiteIngredient*ingredient.prix_gramme_cl_unite) DESC
+) AS listePrixRecette (on nomme cette table pour que la requête se fasse correctement)
+
+
+composition.quantiteIngredient*ingredient.prix_gramme_cl_unite --> prix d'un ingrédient dans une recette
+SUM(composition.quantiteIngredient * ingredient.prix_gramme_cl_unite) --> somme des prix d'un ingrédient dans une recette = prix de la recette
+GROUP BY composition.idRecette --> on groupe de façon à sommer sur les ingrédients par reccette, pour avoir le prix de chaque recette
+ORDER BY SUM(composition.quantiteIngredient*ingredient.prix_gramme_cl_unite) DESC --> on trie de la plus chère à la moins chère
+SELECT recette.nomRecette, MAX(prixRecette) AS prixRecetteMax --> on récupère la ou les plus chères de la colonne prixRecette
+
+
+
+test loupé ! 
+
+SELECT tentative, prixRecette AS prixRecetteMax
+FROM (
+    SELECT recette.nomRecette AS tentative, SUM(composition.quantiteIngredient*ingredient.prix_gramme_cl_unite) AS prixRecette
+FROM composition 
+INNER JOIN ingredient ON composition.idIngredient=ingredient.idIngredient
+INNER JOIN recette ON composition.idRecette=recette.idRecette
+GROUP BY composition.idRecette
+ORDER BY SUM(composition.quantiteIngredient*ingredient.prix_gramme_cl_unite) DESC
+) AS listePrixRecette
+WHERE listePrixRecette.prixRecette = (SELECT MAX(listePrixRecette.prixRecette) FROM listePrixRecette)
+
+table recettes_michael.listePrixRecette doesn't exist ! 
+autrement dit, la table listePrixRecette n'est pas accessible pour mon choix de MAX
+
+
+test réussi ! 
+
+WITH listePrixRecette AS (
+    SELECT recette.nomRecette AS tentative, SUM(composition.quantiteIngredient*ingredient.prix_gramme_cl_unite) AS prixRecette
+FROM composition 
+INNER JOIN ingredient ON composition.idIngredient=ingredient.idIngredient
+INNER JOIN recette ON composition.idRecette=recette.idRecette
+GROUP BY composition.idRecette
+ORDER BY SUM(composition.quantiteIngredient*ingredient.prix_gramme_cl_unite) DESC
+)
+SELECT tentative, prixRecette AS prixRecetteMax
+FROM listePrixRecette
+WHERE prixRecette = (SELECT MAX(prixRecette) FROM listePrixRecette)
+
+
+
+une autre façon de procéder :
+
+SELECT tentative, prixRecette AS prixRecetteMax
+FROM (
+    SELECT recette.nomRecette AS tentative, 
+           SUM(composition.quantiteIngredient * ingredient.prix_gramme_cl_unite) AS prixRecette
+    FROM composition 
+    INNER JOIN ingredient ON composition.idIngredient = ingredient.idIngredient
+    INNER JOIN recette ON composition.idRecette = recette.idRecette
+    GROUP BY composition.idRecette
+) AS listePrixRecette
+WHERE prixRecette = (
+    SELECT MAX(prixRecette)
+    FROM (
+        SELECT SUM(composition.quantiteIngredient * ingredient.prix_gramme_cl_unite) AS prixRecette
+        FROM composition 
+        INNER JOIN ingredient ON composition.idIngredient = ingredient.idIngredient
+        INNER JOIN recette ON composition.idRecette = recette.idRecette
+        GROUP BY composition.idRecette
+    ) AS maxPrixRecette (nom de la table provisoire définie entre les lignes 310 à 314 = maxPrixRecette et elle contient la colonne prixRecette)
+)
 
 
 
