@@ -317,6 +317,31 @@ WHERE prixRecette = (
 
 
 
+en partant du test loupé, on change la ligne WHERE listePrixRecette.prixRecette = (SELECT MAX(listePrixRecette.prixRecette) FROM listePrixRecette)
+en réécrivant la table listePrixRecette en entier ! 
+
+SELECT tentative, prixRecette AS prixRecetteMax
+FROM (
+    SELECT recette.nomRecette AS tentative, 
+           SUM(composition.quantiteIngredient * ingredient.prix_gramme_cl_unite) AS prixRecette
+    FROM composition 
+    INNER JOIN ingredient ON composition.idIngredient = ingredient.idIngredient
+    INNER JOIN recette ON composition.idRecette = recette.idRecette
+    GROUP BY composition.idRecette
+) AS listePrixRecette
+WHERE prixRecette = (
+    SELECT MAX(prixRecette)
+    FROM (
+        SELECT recette.nomRecette AS tentative, SUM(composition.quantiteIngredient * ingredient.prix_gramme_cl_unite) AS prixRecette
+        FROM composition 
+        INNER JOIN ingredient ON composition.idIngredient = ingredient.idIngredient
+        INNER JOIN recette ON composition.idRecette = recette.idRecette
+        GROUP BY composition.idRecette
+    ) AS maxPrixRecette (nom de la table provisoire définie entre les lignes 310 à 314 = maxPrixRecette et elle contient la colonne prixRecette)
+)
+
+
+
 
 
 !!!!!!!!!!!!!!!!!!!! ATTENTION !!!!!!!!!!!!!!!!!!!!
